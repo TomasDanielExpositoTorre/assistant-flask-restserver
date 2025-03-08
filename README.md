@@ -64,6 +64,8 @@ To use a custom hostname for the REST server, change the default value in the fo
 For integration with wearOS, additional files need to be changed:
 * Home.kt, ObjectDetail.kt
 * network_security_config.xml
+
+
 Finally, regenerate the certificate and run the application
 ```bash
 source certgen.sh
