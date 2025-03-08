@@ -1,6 +1,8 @@
 [versions]
 agp = "8.8.0"
 kotlin = "2.0.0"
+kotlinxSerializationJson = "1.5.0"
+okhttp = "4.9.3"
 playServicesWearable = "19.0.0"
 composeBom = "2024.04.01"
 composeMaterial = "1.2.1"
@@ -12,6 +14,8 @@ composeNavigation = "1.4.1"
 composeMaterial3 = "1.0.0-alpha33"
 
 [libraries]
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
+okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 play-services-wearable = { group = "com.google.android.gms", name = "play-services-wearable", version.ref = "playServicesWearable" }
 compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
 ui = { group = "androidx.compose.ui", name = "ui" }

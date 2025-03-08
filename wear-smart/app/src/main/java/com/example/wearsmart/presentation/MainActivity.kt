@@ -22,6 +22,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
 import androidx.wear.compose.foundation.lazy.ScalingLazyListState
 import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
@@ -33,6 +35,8 @@ import androidx.wear.compose.navigation.SwipeDismissableNavHost
 import androidx.wear.compose.navigation.composable
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
 import com.example.wearsmart.presentation.theme.WearSmartTheme
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,11 +55,19 @@ fun WearSmart() {
             SwipeDismissableNavHost(navController = navController, startDestination = "home")
             {
                 composable("home") {
-                    Home(onClicker = { navController.navigate("object") })
+                    Home(clickFn = { device ->
+                        navController.navigate("object/$device")
+                    })
                 }
-                composable("object") {
-                    ObjectDetail(name = "Pepe2", onClicker = {})
+                composable(
+                    "object/{deviceJson}",
+                    arguments = listOf(navArgument("deviceJson") { type = NavType.StringType })
+                ) { backStackEntry ->
+                    val deviceJsonString = backStackEntry.arguments?.getString("deviceJson") ?: ""
+                    val deviceJson = Json.parseToJsonElement(deviceJsonString).jsonObject
+                    DeviceDetail(deviceJson, navController)
                 }
+
             }
         }
     }

@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.plugin.ide.kotlinExtrasSerialization
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -52,8 +54,11 @@ dependencies {
     implementation(libs.core.splashscreen)
     implementation(libs.compose.navigation)
     implementation(libs.compose.material3)
+    implementation(libs.okhttp)
+    implementation(libs.kotlinx.serialization.json)
     androidTestImplementation(platform(libs.compose.bom))
     androidTestImplementation(libs.ui.test.junit4)
     debugImplementation(libs.ui.tooling)
     debugImplementation(libs.ui.test.manifest)
+
 }
