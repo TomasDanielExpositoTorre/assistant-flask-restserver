@@ -17,6 +17,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -63,7 +64,7 @@ fun DeviceDetail(device: JsonObject, navController: NavController) {
 
     /* Attributes, defaults and references for the page */
     val attributes = device["attributes"]!!.jsonObject
-    val refs = mutableMapOf<String, MutableState<Float>>()
+    val refs = rememberSaveable { mutableMapOf<String, MutableState<Float>>() }
     val rgb = device["rgb"]?.jsonArray
     val r = remember { mutableFloatStateOf(rgb?.get(0)?.jsonPrimitive?.float ?: 0f) }
     val g = remember { mutableFloatStateOf(rgb?.get(1)?.jsonPrimitive?.float ?: 0f) }
@@ -89,7 +90,7 @@ fun DeviceDetail(device: JsonObject, navController: NavController) {
         items(attributes.keys.size) { i ->
             val key = attributes.keys.elementAt(i)
             val attrs = attributes[key]!!.jsonArray
-            refs[key] = remember { mutableFloatStateOf(attrs[2].jsonPrimitive.float) }
+            refs[key] = rememberSaveable { mutableFloatStateOf(attrs[2].jsonPrimitive.float) }
             refs[key]?.let {
                 SingleSlider(key, attrs[0].jsonPrimitive.float, attrs[1].jsonPrimitive.float, it)
             }
@@ -257,7 +258,7 @@ fun post(
 
             // Build the HTTP request
             val request = Request.Builder()
-                .url("https://192.168.1.64:8000/devices")
+                .url("https://glados.local:8000/devices")
                 .addHeader("Content-Type", "application/json")
                 .post(body)
                 .build()
@@ -314,7 +315,7 @@ fun post(entityId: String) {
 
             // Build the HTTP request
             val request = Request.Builder()
-                .url("https://192.168.1.64:8000/devices")
+                .url("https://glados.local:8000/devices")
                 .addHeader("Content-Type", "application/json")
                 .post(body)
                 .build()

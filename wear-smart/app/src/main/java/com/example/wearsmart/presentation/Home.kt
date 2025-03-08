@@ -113,7 +113,7 @@ fun ProfileCard(title: String, clickFn: (Boolean) -> Unit) {
 
 suspend fun fetchData(): JsonArray? {
     val client = OkHttpClient()
-    val url = "https://192.168.1.64:8000/devices"
+    val url = "https://glados.local:8000/devices"
     val request = Request.Builder().url(url).build()
 
     return withContext(Dispatchers.IO) {
