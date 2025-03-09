@@ -55,7 +55,7 @@ fun WearSmart() {
             SwipeDismissableNavHost(navController = navController, startDestination = "home")
             {
                 composable("home") {
-                    Home(clickFn = { device ->
+                    DeviceList(clickFn = { device ->
                         navController.navigate("object/$device")
                     })
                 }
@@ -65,7 +65,7 @@ fun WearSmart() {
                 ) { backStackEntry ->
                     val deviceJsonString = backStackEntry.arguments?.getString("deviceJson") ?: ""
                     val deviceJson = Json.parseToJsonElement(deviceJsonString).jsonObject
-                    DeviceDetail(deviceJson, navController)
+                    DeviceDetail(deviceJson)
                 }
 
             }
