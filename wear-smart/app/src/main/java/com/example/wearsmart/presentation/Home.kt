@@ -43,9 +43,10 @@ fun Home(clickFn: (JsonObject) -> Unit) {
     val scalingLazyListState: ScalingLazyListState = rememberScalingLazyListState()
     val profiles = listOf("Perfil1", "Perfil2", "Perfil3")
     val devices = remember { mutableStateOf(JsonArray(emptyList())) }
+    val api = NetworkCommunicator()
 
     LaunchedEffect(Unit) {
-        devices.value = fetchData()!!
+        devices.value = api.get()
     }
 
     ScalingLazyColumn(
@@ -111,22 +112,3 @@ fun ProfileCard(title: String, clickFn: (Boolean) -> Unit) {
     )
 }
 
-suspend fun fetchData(): JsonArray? {
-    val client = OkHttpClient()
-    val url = "https://glados.local:8000/devices"
-    val request = Request.Builder().url(url).build()
-
-    return withContext(Dispatchers.IO) {
-        try {
-            val response = client.newCall(request).execute()
-            if (response.isSuccessful) {
-                Json.parseToJsonElement(response.body!!.string()).jsonArray
-            } else {
-                null
-            }
-        } catch (e: Exception) {
-            println(e)
-            null
-        }
-    }
-}
