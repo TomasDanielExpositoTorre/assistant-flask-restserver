@@ -1,7 +1,15 @@
 import requests
 import json
 from flask import Flask, jsonify, request
+from dotenv import load_dotenv
+import os
+load_dotenv()
 
+BASE_URL = f"{os.getenv('URL')}/api"
+HEADERS = {
+  "Content-Type": "application/json",
+  "Authorization": f"Bearer {os.getenv('TOKEN')}"
+}
 app = Flask(__name__)
 
 
@@ -59,10 +67,6 @@ def post_devices():
         "entity_id": "entity_id",
     }
     off = data.pop("off")
-    headers = {
-        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI0NDdlODRkYTExNmI0Yzk2YjIxM2ExMDdhMTY2NmVmMCIsImlhdCI6MTY3ODI3MTU4OSwiZXhwIjoxOTkzNjMxNTg5fQ.-jUvyVsmzQMxrkRd1kLNM_PIH1HTGnzsOzESDWlPukE",
-        "Content-Type": "application/json",
-    }
     l = fetch_light(data["entity_id"])["attributes"]
 
     if off == False:
@@ -79,15 +83,15 @@ def post_devices():
             else:
                 req.pop("kelvin")
         requests.post(
-            f"https://danubio.ii.uam.es/api/services/light/turn_on",
-            headers=headers,
+            f"{BASE_URL}/api/services/light/turn_on",
+            headers=HEADERS,
             json=req,
         )
     else:
         req = {"entity_id": data["entity_id"]}
         requests.post(
             f"https://danubio.ii.uam.es/api/services/light/turn_off",
-            headers=headers,
+            headers=HEADERS,
             json=req,
         )
 
@@ -96,21 +100,13 @@ def post_devices():
 
 def fetch_devices():
     url = "https://danubio.ii.uam.es/api/states"
-    headers = {
-        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI0NDdlODRkYTExNmI0Yzk2YjIxM2ExMDdhMTY2NmVmMCIsImlhdCI6MTY3ODI3MTU4OSwiZXhwIjoxOTkzNjMxNTg5fQ.-jUvyVsmzQMxrkRd1kLNM_PIH1HTGnzsOzESDWlPukE",
-        "Content-Type": "application/json",
-    }
-    response = requests.get(url, headers=headers)
+    response = requests.get(url, headers=HEADERS)
     return json.loads(response.text)
 
 
 def fetch_light(id):
     url = f"https://danubio.ii.uam.es/api/states/{id}"
-    headers = {
-        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI0NDdlODRkYTExNmI0Yzk2YjIxM2ExMDdhMTY2NmVmMCIsImlhdCI6MTY3ODI3MTU4OSwiZXhwIjoxOTkzNjMxNTg5fQ.-jUvyVsmzQMxrkRd1kLNM_PIH1HTGnzsOzESDWlPukE",
-        "Content-Type": "application/json",
-    }
-    response = requests.get(url, headers=headers)
+    response = requests.get(url, headers=HEADERS)
     return json.loads(response.text)
 
 

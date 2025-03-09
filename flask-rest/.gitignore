@@ -1,3 +1,4 @@
 server.crt
 server.key
 server.pem
+.env
