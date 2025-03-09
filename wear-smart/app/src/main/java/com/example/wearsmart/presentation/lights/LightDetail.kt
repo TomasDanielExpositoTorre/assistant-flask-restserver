@@ -1,4 +1,4 @@
-package com.example.wearsmart.presentation
+package com.example.wearsmart.presentation.lights
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -20,7 +20,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
 import androidx.wear.compose.foundation.lazy.ScalingLazyListState
 import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
@@ -30,6 +29,8 @@ import androidx.wear.compose.material.Icon
 import androidx.wear.compose.material.InlineSlider
 import androidx.wear.compose.material.InlineSliderDefaults
 import androidx.wear.compose.material.Text
+import com.example.wearsmart.presentation.NetworkCommunicator
+import com.example.wearsmart.presentation.devices.SingleSlider
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.float
 import kotlinx.serialization.json.jsonArray
@@ -37,15 +38,16 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
 @Composable
-fun DeviceDetail(device: JsonObject) {
+fun LightDetail(device: JsonObject) {
 
     val scalingLazyListState: ScalingLazyListState = rememberScalingLazyListState()
 
     /* Attributes, defaults and references for the page */
     val api = NetworkCommunicator()
-    val attributes = device["attributes"]!!.jsonObject
+    val attributes = device["attributes"]!!.jsonObject.toMutableMap()
+    val rgb = attributes.remove("Color")?.jsonArray
+
     val refs = rememberSaveable { mutableMapOf<String, MutableState<Float>>() }
-    val rgb = device["rgb"]?.jsonArray
     val r = remember { mutableFloatStateOf(rgb?.get(0)?.jsonPrimitive?.float ?: 0f) }
     val g = remember { mutableFloatStateOf(rgb?.get(1)?.jsonPrimitive?.float ?: 0f) }
     val b = remember { mutableFloatStateOf(rgb?.get(2)?.jsonPrimitive?.float ?: 0f) }
@@ -54,7 +56,7 @@ fun DeviceDetail(device: JsonObject) {
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
         state = scalingLazyListState,
     ) {
         /* Title */
@@ -83,7 +85,6 @@ fun DeviceDetail(device: JsonObject) {
 
 
         /* Submit buttons */
-        item { Spacer(modifier = Modifier.height(12.dp)) }
         item {
             Row {
                 Button(
@@ -116,71 +117,3 @@ fun DeviceDetail(device: JsonObject) {
     }
 }
 
-@Composable
-fun SingleSlider(title: String, min: Float, max: Float, curr: MutableState<Float>) {
-    Column {
-        Spacer(modifier = Modifier.height(12.dp))
-        Text(title, textAlign = TextAlign.Left, fontSize = 12.sp)
-        Spacer(modifier = Modifier.height(4.dp))
-        InlineSlider(
-            value = curr.value,
-            onValueChange = { value -> curr.value = value },
-            increaseIcon = { Icon(InlineSliderDefaults.Increase, "Increase") },
-            decreaseIcon = { Icon(InlineSliderDefaults.Decrease, "Decrease") },
-            valueRange = min..max,
-            steps = 9,
-            segmented = false,
-            modifier = Modifier.height(40.dp)
-        )
-    }
-}
-
-@Composable
-fun ColorSlider(r: MutableState<Float>, g: MutableState<Float>, b: MutableState<Float>) {
-    Column {
-        Spacer(modifier = Modifier.height(12.dp))
-        Text("Color", textAlign = TextAlign.Left, fontSize = 12.sp)
-        Spacer(modifier = Modifier.height(4.dp))
-        InlineSlider(
-            value = r.value,
-            onValueChange = { value -> r.value = value },
-            increaseIcon = { Icon(InlineSliderDefaults.Increase, "Increase") },
-            decreaseIcon = { Icon(InlineSliderDefaults.Decrease, "Decrease") },
-            valueRange = 0f..255f,
-            steps = 9,
-            segmented = false,
-            modifier = Modifier.height(40.dp),
-            colors = InlineSliderDefaults.colors(
-                selectedBarColor = Color(0xccd85252)
-            )
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        InlineSlider(
-            value = g.value,
-            onValueChange = { value -> g.value = value },
-            increaseIcon = { Icon(InlineSliderDefaults.Increase, "Increase") },
-            decreaseIcon = { Icon(InlineSliderDefaults.Decrease, "Decrease") },
-            valueRange = 0f..255f,
-            steps = 9,
-            segmented = false,
-            modifier = Modifier.height(40.dp),
-            colors = InlineSliderDefaults.colors(
-                selectedBarColor = Color(0xcc4fca3a)
-            )
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        InlineSlider(
-            value = b.value,
-            onValueChange = { value -> b.value = value },
-            increaseIcon = { Icon(InlineSliderDefaults.Increase, "Increase") },
-            decreaseIcon = { Icon(InlineSliderDefaults.Decrease, "Decrease") },
-            valueRange = 0f..255f,
-            steps = 9,
-            segmented = false,
-            modifier = Modifier.height(40.dp),
-            colors = InlineSliderDefaults.colors(
-                selectedBarColor = Color(0xcc13139a)
-            )
-        )
-    }
-}

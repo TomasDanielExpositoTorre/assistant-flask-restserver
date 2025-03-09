@@ -12,7 +12,6 @@ import androidx.wear.compose.material.Card
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
 import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
@@ -20,7 +19,6 @@ import kotlinx.serialization.json.jsonPrimitive
 fun LightCard(device: JsonObject, clickFn: (JsonObject) -> Unit) {
     val title = device["name"]!!.jsonPrimitive.content
     val attrs = device["attributes"]!!.jsonObject.keys.joinToString(", ")
-    val rgb = if (device["rgb"]?.jsonArray != null) ", Color" else ""
 
     Card(
         onClick = { clickFn(device) },
@@ -29,7 +27,7 @@ fun LightCard(device: JsonObject, clickFn: (JsonObject) -> Unit) {
         Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis, fontSize = 12.sp)
         Spacer(modifier = Modifier.height(6.dp))
         Text(
-            attrs + rgb,
+            attrs,
             overflow = TextOverflow.Ellipsis,
             fontWeight = FontWeight.Thin,
             fontSize = 10.sp
