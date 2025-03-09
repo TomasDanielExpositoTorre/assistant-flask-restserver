@@ -23,6 +23,7 @@ import com.example.wearsmart.presentation.profiles.ProfileCard
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 
 
 @Composable
@@ -47,7 +48,12 @@ fun DeviceList(clickFn: (JsonObject) -> Unit) {
     ) {
         /* Device List */
         item { Text("Devices", textAlign = TextAlign.Left, fontSize = 12.sp) }
-        items(devices.value.size) { i -> LightCard(devices.value[i].jsonObject, clickFn) }
+        items(devices.value.size) { i ->
+            when(val type = devices.value[i].jsonObject["type"]!!.jsonPrimitive.content) {
+                "light" -> LightCard(devices.value[i].jsonObject, clickFn)
+                else -> throw IllegalArgumentException("Unknown type: $type")
+            }
+        }
 
         item { Spacer(modifier = Modifier.height(12.dp)) }
 

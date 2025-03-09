@@ -12,17 +12,13 @@ import androidx.wear.compose.material.ToggleChip
 @Composable
 fun ProfileCard(title: String, clickFn: (Boolean) -> Unit) {
     ToggleChip(
-        checked = false,
-        label = {
-            Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis, fontSize = 12.sp)
-        },
-        onCheckedChange = clickFn,
-        toggleControl = {
-            Switch(
-                checked = false,
-                enabled = true,
-            )
-        },
-        modifier = Modifier.fillMaxSize()
+        checked = false, label = {
+        Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis, fontSize = 12.sp)
+    }, onCheckedChange = clickFn, toggleControl = {
+        Switch(
+            checked = false,
+            enabled = true,
+        )
+    }, modifier = Modifier.fillMaxSize()
     )
 }

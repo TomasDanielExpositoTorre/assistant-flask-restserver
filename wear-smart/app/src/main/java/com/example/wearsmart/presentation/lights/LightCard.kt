@@ -27,10 +27,7 @@ fun LightCard(device: JsonObject, clickFn: (JsonObject) -> Unit) {
         Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis, fontSize = 12.sp)
         Spacer(modifier = Modifier.height(6.dp))
         Text(
-            attrs,
-            overflow = TextOverflow.Ellipsis,
-            fontWeight = FontWeight.Thin,
-            fontSize = 10.sp
+            attrs, overflow = TextOverflow.Ellipsis, fontWeight = FontWeight.Thin, fontSize = 10.sp
         )
     }
 }

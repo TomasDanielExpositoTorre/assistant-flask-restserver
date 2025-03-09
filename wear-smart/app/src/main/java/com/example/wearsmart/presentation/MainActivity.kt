@@ -3,8 +3,8 @@ package com.example.wearsmart.presentation
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.compose.runtime.Composable
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import androidx.wear.compose.material3.AppScaffold
@@ -30,14 +30,14 @@ fun WearSmart() {
     WearSmartTheme {
         AppScaffold {
             val navController = rememberSwipeDismissableNavController()
-            SwipeDismissableNavHost(navController = navController, startDestination = "home") {
-                composable("home") {
+            SwipeDismissableNavHost(navController = navController, startDestination = "list") {
+                composable("list") {
                     DeviceList(clickFn = { device ->
-                        navController.navigate("object/$device")
+                        navController.navigate("detail/$device")
                     })
                 }
                 composable(
-                    "object/{deviceJson}",
+                    "detail/{deviceJson}",
                     arguments = listOf(navArgument("deviceJson") { type = NavType.StringType })
                 ) { backStackEntry ->
                     val deviceJsonString = backStackEntry.arguments?.getString("deviceJson") ?: ""

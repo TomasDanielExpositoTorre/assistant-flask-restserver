@@ -1,11 +1,9 @@
 package com.example.wearsmart.presentation.lights
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -17,7 +15,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
@@ -25,9 +22,6 @@ import androidx.wear.compose.foundation.lazy.ScalingLazyListState
 import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
 import androidx.wear.compose.material.Button
 import androidx.wear.compose.material.ButtonDefaults
-import androidx.wear.compose.material.Icon
-import androidx.wear.compose.material.InlineSlider
-import androidx.wear.compose.material.InlineSliderDefaults
 import androidx.wear.compose.material.Text
 import com.example.wearsmart.presentation.NetworkCommunicator
 import com.example.wearsmart.presentation.devices.SingleSlider
@@ -89,28 +83,22 @@ fun LightDetail(device: JsonObject) {
             Row {
                 Button(
                     onClick = {
-                        api.post(device["id"]!!.jsonPrimitive.content, refs, rgb, r, g, b)
-                    },
-                    modifier = Modifier.size(ButtonDefaults.SmallButtonSize),
-                    content = {
-                        Text("ON", color = Color.White)
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        backgroundColor = Color(0xcc4fca3a)
-                    )
+                    api.post(device["id"]!!.jsonPrimitive.content, refs, rgb, r, g, b)
+                }, modifier = Modifier.size(ButtonDefaults.SmallButtonSize), content = {
+                    Text("ON", color = Color.White)
+                }, colors = ButtonDefaults.buttonColors(
+                    backgroundColor = Color(0xcc4fca3a)
+                )
                 )
                 Spacer(modifier = Modifier.width(16.dp)) // Space between the buttons
                 Button(
                     onClick = {
-                        api.post(device["id"]!!.jsonPrimitive.content)
-                    },
-                    modifier = Modifier.size(ButtonDefaults.SmallButtonSize),
-                    content = {
-                        Text("OFF", color = Color.White)
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        backgroundColor = Color(0xccd85252)
-                    )
+                    api.post(device["id"]!!.jsonPrimitive.content)
+                }, modifier = Modifier.size(ButtonDefaults.SmallButtonSize), content = {
+                    Text("OFF", color = Color.White)
+                }, colors = ButtonDefaults.buttonColors(
+                    backgroundColor = Color(0xccd85252)
+                )
                 )
             }
         }
