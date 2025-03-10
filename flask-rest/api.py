@@ -1,5 +1,5 @@
 import json
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from dotenv import load_dotenv
 import os
 from flask_cors import CORS
@@ -28,7 +28,7 @@ def get_devices():
             dev: Device = supported_devices[dtype](d)
             data.append(dev.data())
 
-    return json.dumps(data)
+    return jsonify(data)
 
 
 @app.route("/devices", methods=["POST"])
