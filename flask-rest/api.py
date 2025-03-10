@@ -3,15 +3,16 @@ import json
 from flask import Flask, jsonify, request
 from dotenv import load_dotenv
 import os
+from flask_cors import CORS
 load_dotenv()
 
-BASE_URL = f"{os.getenv('URL')}/api"
+BASE_URL = f"{os.getenv('BASE_URL')}"
 HEADERS = {
   "Content-Type": "application/json",
   "Authorization": f"Bearer {os.getenv('TOKEN')}"
 }
 app = Flask(__name__)
-
+cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
 @app.route("/devices", methods=["GET"])
 def get_devices():
@@ -90,7 +91,7 @@ def post_devices():
     else:
         req = {"entity_id": data["entity_id"]}
         requests.post(
-            f"https://danubio.ii.uam.es/api/services/light/turn_off",
+            f"{BASE_URL}/api/services/light/turn_off",
             headers=HEADERS,
             json=req,
         )
@@ -99,13 +100,13 @@ def post_devices():
 
 
 def fetch_devices():
-    url = "https://danubio.ii.uam.es/api/states"
+    url = f"{BASE_URL}/api/states"
     response = requests.get(url, headers=HEADERS)
     return json.loads(response.text)
 
 
 def fetch_light(id):
-    url = f"https://danubio.ii.uam.es/api/states/{id}"
+    url = f"{BASE_URL}/api/states/{id}"
     response = requests.get(url, headers=HEADERS)
     return json.loads(response.text)
 

@@ -1,5 +1,6 @@
 package com.example.wearsmart.presentation
 
+import android.util.Log
 import androidx.compose.runtime.MutableState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -36,13 +37,16 @@ class NetworkCommunicator() {
                 } else {
                     JsonArray(listOf(JsonObject(mapOf(
                         "name" to JsonPrimitive("Unavailable"),
+                        "type" to JsonPrimitive("light"),
                         "attributes" to JsonObject(
                             mapOf("Error ${response.code}" to JsonPrimitive(true)))))))
                 }
             } catch (e: Exception) {
-                println(e)
+                Log.e("POTATOE", "Exception occurred: " + e.toString(), e)
+                e.printStackTrace()
                 JsonArray(listOf(JsonObject(mapOf(
                     "name" to JsonPrimitive("Unavailable"),
+                    "type" to JsonPrimitive("light"),
                     "attributes" to JsonObject(
                         mapOf("API Unreachable" to JsonPrimitive(true)))))))
             }
@@ -98,7 +102,7 @@ class NetworkCommunicator() {
                 val body = jsonInputString.toRequestBody("application/json".toMediaTypeOrNull())
 
                 val request = Request.Builder()
-                    .url("https://glados.local:8000/devices")
+                    .url(url)
                     .addHeader("Content-Type", "application/json")
                     .post(body)
                     .build()
