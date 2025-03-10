@@ -1,118 +1,42 @@
-import requests
 import json
-from flask import Flask, jsonify, request
+from flask import Flask, request
 from dotenv import load_dotenv
 import os
 from flask_cors import CORS
+from devices.device import Device
+from devices.light import Light
+
 load_dotenv()
 
 BASE_URL = f"{os.getenv('BASE_URL')}"
 HEADERS = {
-  "Content-Type": "application/json",
-  "Authorization": f"Bearer {os.getenv('TOKEN')}"
+    "Content-Type": "application/json",
+    "Authorization": f"Bearer {os.getenv('TOKEN')}",
 }
 app = Flask(__name__)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
+
 @app.route("/devices", methods=["GET"])
 def get_devices():
-    lights = fetch_lights(fetch_devices())
+    devices = Device.get(BASE_URL, HEADERS)
+    supported_devices = {"light": Light}
     data = []
+    for d in devices:
+        dtype, _, _ = d["entity_id"].partition(".")
+        if supported_devices.get(dtype):
+            dev: Device = supported_devices[dtype](d)
+            data.append(dev.data())
 
-    for l in lights:
-        attrs = l["attributes"]
-        # Default attributes
-        dev = {
-            "id": l["entity_id"],
-            "name": attrs["friendly_name"],
-            "type": "light",
-            "attributes": {
-                "Brightness": [
-                    0,
-                    255,
-                    attrs["brightness"] if attrs["brightness"] is not None else 0,
-                ]
-            },
-        }
-
-        # RGB color mode
-        if "hs" in attrs["supported_color_modes"]:
-            dev["attributes"]["Color"] = (
-                attrs["rgb_color"] if attrs["rgb_color"] is not None else [0, 0, 0]
-            )
-
-        # Temperature color mode
-        if "color_temp" in attrs["supported_color_modes"]:
-            dev["attributes"]["Temperature"] = [
-                attrs["min_color_temp_kelvin"],
-                attrs["max_color_temp_kelvin"],
-                (
-                    attrs["color_temp_kelvin"]
-                    if attrs["color_temp_kelvin"] is not None
-                    else attrs["min_color_temp_kelvin"]
-                ),
-            ]
-
-        data.append(dev)
-    return jsonify(data)
+    return json.dumps(data)
 
 
 @app.route("/devices", methods=["POST"])
 def post_devices():
-    # Convert byte string to a regular string
     data: dict = json.loads(request.data)
-    mapping = {
-        "Brightness": "brightness",
-        "Temperature": "kelvin",
-        "rgb": "rgb_color",
-        "entity_id": "entity_id",
-    }
-    off = data.pop("off")
-    l = fetch_light(data["entity_id"])["attributes"]
-
-    if off == False:
-        req = {mapping[key]: value for key, value in data.items()}
-        color = req.get("rgb_color", False)
-        temp = req.get("kelvin", False)
-
-        # Remove non-changing values when clashing but prioritize RGB
-        if color:
-            if temp == l["min_color_temp_kelvin"] or temp == l["color_temp_kelvin"]:
-                req.pop("kelvin")
-            elif color == l["rgb_color"]:
-                req.pop("rgb_color")
-            else:
-                req.pop("kelvin")
-        requests.post(
-            f"{BASE_URL}/api/services/light/turn_on",
-            headers=HEADERS,
-            json=req,
-        )
-    else:
-        req = {"entity_id": data["entity_id"]}
-        requests.post(
-            f"{BASE_URL}/api/services/light/turn_off",
-            headers=HEADERS,
-            json=req,
-        )
-
-    return jsonify("Hola reloj!")
-
-
-def fetch_devices():
-    url = f"{BASE_URL}/api/states"
-    response = requests.get(url, headers=HEADERS)
-    return json.loads(response.text)
-
-
-def fetch_light(id):
-    url = f"{BASE_URL}/api/states/{id}"
-    response = requests.get(url, headers=HEADERS)
-    return json.loads(response.text)
-
-
-def fetch_lights(devices: list):
-    return [d for d in devices if "light." in d["entity_id"]]
+    supported_devices = {"light": Light}
+    dtype, _, _ = data["entity_id"].partition(".")
+    return supported_devices[dtype].post(data, BASE_URL, HEADERS)
 
 
 app.run(host="0.0.0.0", port=8000, ssl_context=("server.crt", "server.key"))
