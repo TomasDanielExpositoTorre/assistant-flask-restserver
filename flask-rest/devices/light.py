@@ -61,11 +61,12 @@ class Light(Device):
         # Turn the light off
         if turn_off:
             request = {"entity_id": request["entity_id"]}
-            return requests.post(
+            requests.post(
                 f"{url}/api/services/light/turn_off",
                 headers=headers,
                 json=request,
             )
+            return jsonify("Turning off!")
 
         # Turn the light on
         attrs = Light.get(request["entity_id"], url, headers)["attributes"]
@@ -85,8 +86,9 @@ class Light(Device):
             else:
                 request.pop("kelvin")
 
-        return requests.post(
+        requests.post(
             f"{url}/api/services/light/turn_on",
             headers=headers,
             json=request,
         )
+        return jsonify("Turning on!")
