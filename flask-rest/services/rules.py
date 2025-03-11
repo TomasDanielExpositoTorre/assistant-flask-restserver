@@ -20,7 +20,7 @@ class Rules:
         }
 
         self.on = re.compile(
-            r"(abre|abrir|hable|habre|habla|habre|enciende)", re.IGNORECASE
+            r"(abre|abrir|hable|habre|habla|habre|enciende|encender|prender)", re.IGNORECASE
         )
         self.off = re.compile(r"(cierra|cerrar|cierre|apaga)", re.IGNORECASE)
 
@@ -93,13 +93,14 @@ class Rules:
         return color, kelvin, brightness
 
     def analyze(self, sentence):
-        sentence = sentence[:-1] if sentence[-1] == "." else sentence
         print(sentence)
 
         if not re.search(self.lights, sentence):
             return False
-
+        
+        sentence = sentence[:-1] if sentence[-1] == "." else sentence
         lights = self.get_lights(sentence)
+
         if re.search(self.off, sentence):
             self.turn_off(lights)
         elif re.search(self.on, sentence):
