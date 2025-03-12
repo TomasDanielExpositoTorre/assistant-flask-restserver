@@ -52,7 +52,7 @@ class Listener:
     def process(self, audio):
         """
         Wrapper function to record and process audio until silence is detected.
-e
+
         Args:
             audio (bytes): Initial audio section
 
