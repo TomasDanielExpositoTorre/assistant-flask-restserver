@@ -1,0 +1,65 @@
+{
+  "Perfil Sexy": [
+    {
+      "entity_id": "light.lampara_derecha",
+      "name": "Lampara derecha",
+      "off": false,
+      "Brightness": 255,
+      "rgb": [240, 117, 223]
+    },
+    {
+      "entity_id": "light.lampara_de_lectura",
+      "name": "Lampara de lectura",
+      "off": true
+    },
+    {
+      "entity_id": "light.lampara_izquierda",
+      "name": "Lampara izquierda",
+      "off": true
+    }
+  ],
+  "Perfil Luz": [
+    {
+      "entity_id": "light.lampara_derecha",
+      "name": "Lampara derecha",
+      "off": true
+    },
+    {
+      "entity_id": "light.lampara_de_lectura",
+      "name": "Lampara de lectura",
+      "off": false,
+      "Brightness": 255,
+      "Temperature": 10000
+    },
+    {
+      "entity_id": "light.lampara_izquierda",
+      "name": "Lampara izquierda",
+      "off": false,
+      "Brightness": 255,
+      "Temperature": 10000
+    }
+  ],
+  "Perfil Lectura": [
+    {
+      "entity_id": "light.lampara_de_lectura",
+      "name": "Lampara de lectura",
+      "off": false,
+      "Brightness": 150,
+      "Temperature": 10
+    },
+    {
+      "entity_id": "light.lampara_derecha",
+      "name": "Lampara derecha",
+      "off": false,
+      "Brightness": 150,
+      "Temperature": 10
+    },
+    {
+      "entity_id": "light.lampara_izquierda",
+      "name": "Lampara izquierda",
+      "off": false,
+      "Brightness": 150,
+      "Temperature": 10
+    }
+  ]
+}

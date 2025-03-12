@@ -42,85 +42,33 @@ def post_devices():
 
 @app.route("/profiles", methods=["GET"])
 def get_profiles():
+    global profiles
+
     return jsonify(
         {
-            "Perfil Sexy": ["Lampara derecha"],
-            "Perfil Luz": ["Lampara izquierda", "Lampara de lectura"],
-            "Perfil Lectura": [
-                "Lampara derecha",
-                "Lampara izquierda",
-                "Lampara de lectura",
-            ],
+            key: [device["name"] for device in devices]
+            for key, devices in profiles.items()
         }
     )
 
 
 @app.route("/profiles", methods=["POST"])
 def post_profiles():
+    global profiles
     data: dict = json.loads(request.data)
     supported_devices = {"light": Light}
-    profiles = {
-        "Perfil Sexy": [
-            {
-                "entity_id": "light.lampara_derecha",
-                "off": False,
-                "Brightness": 255,
-                "rgb": [240, 117, 223],
-            },
-            {
-                "entity_id": "light.lampara_de_lectura",
-                "off": True,
-            },
-            {
-                "entity_id": "light.lampara_izquierda",
-                "off": True,
-            },
-        ],
-        "Perfil Luz": [
-            {
-                "entity_id": "light.lampara_derecha",
-                "off": True,
-            },
-            {
-                "entity_id": "light.lampara_de_lectura",
-                "off": False,
-                "Brightness": 255,
-                "Temperature": 10000,
-            },
-            {
-                "entity_id": "light.lampara_izquierda",
-                "off": False,
-                "Brightness": 255,
-                "Temperature": 10000,
-            },
-        ],
-        "Perfil Lectura": [
-            {
-                "entity_id": "light.lampara_de_lectura",
-                "off": False,
-                "Brightness": 150,
-                "Temperature": 10,
-            },
-            {
-                "entity_id": "light.lampara_derecha",
-                "off": False,
-                "Brightness": 150,
-                "Temperature": 10,
-            },
-            {
-                "entity_id": "light.lampara_izquierda",
-                "off": False,
-                "Brightness": 150,
-                "Temperature": 10,
-            },
-        ],
-    }
 
     devices = profiles.get(data.get("profile", ""), [])
     for dev in devices:
         dtype, _, _ = dev["entity_id"].partition(".")
+        dev.pop("name")
         supported_devices[dtype].post(dev, BASE_URL, HEADERS)
 
     return jsonify("Subido crack")
+
+
+with open("profiles.json", "r") as file:
+    profiles: dict = json.load(file)
+
 
 app.run(host="0.0.0.0", port=8000, ssl_context=("server.crt", "server.key"))
