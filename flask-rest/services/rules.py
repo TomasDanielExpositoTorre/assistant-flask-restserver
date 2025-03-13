@@ -6,7 +6,7 @@ import requests
 class Rules:
     def __init__(self):
 
-        self.api = "https://glados.local:8000/devices"
+        self.api = "https://glados.local:8000"
         self.lights = re.compile(
             r"(l[aá]mpara|lapara|luz|lus|lustra|luces)", re.IGNORECASE
         )
@@ -30,6 +30,7 @@ class Rules:
         )
         self.kelvin = re.compile(r"(?:kelvin|calvin)\s+(\d+)", re.IGNORECASE)
         self.brightness = re.compile(r"(?:brillo)\s+(\d+)", re.IGNORECASE)
+        self.profile = re.compile(r"(?:perfil|prefil|profile|porfile|porfavor)\s+(\d+)", re.IGNORECASE)
         self.color_translations = {
             "rojo": "red",
             "naranja": "orange",
@@ -95,6 +96,13 @@ class Rules:
     def analyze(self, sentence):
         print(sentence)
 
+        if _ :=  re.search(self.profile, sentence):
+            requests.post(
+                url=f"{self.api}/profiles",
+                json={"profile": f"Perfil {_.group(1)}"},
+                verify="../server.pem",
+            )
+            return True
         if not re.search(self.lights, sentence):
             return False
         
@@ -110,7 +118,7 @@ class Rules:
     def turn_off(self, lights):
         for light in lights:
             requests.post(
-                url=self.api,
+                url=f"{self.api}/devices",
                 json={"entity_id": light, "off": True},
                 verify="../server.pem",
             )
@@ -132,7 +140,7 @@ class Rules:
 
         for light in lights:
             requests.post(
-                url=self.api,
+                url=f"{self.api}/devices",
                 json={**request, "entity_id": light, "off": False},
                 verify="../server.pem",
             )

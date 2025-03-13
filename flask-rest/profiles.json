@@ -1,5 +1,5 @@
 {
-  "Perfil Sexy": [
+  "Perfil 1": [
     {
       "entity_id": "light.lampara_derecha",
       "name": "Lampara derecha",
@@ -18,7 +18,7 @@
       "off": true
     }
   ],
-  "Perfil Luz": [
+  "Perfil 2": [
     {
       "entity_id": "light.lampara_derecha",
       "name": "Lampara derecha",
@@ -39,7 +39,7 @@
       "Temperature": 10000
     }
   ],
-  "Perfil Lectura": [
+  "Perfil 3": [
     {
       "entity_id": "light.lampara_de_lectura",
       "name": "Lampara de lectura",
