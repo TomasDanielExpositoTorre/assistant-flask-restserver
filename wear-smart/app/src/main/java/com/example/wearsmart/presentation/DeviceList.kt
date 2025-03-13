@@ -30,12 +30,14 @@ import kotlinx.serialization.json.jsonPrimitive
 fun DeviceList(clickFn: (JsonObject) -> Unit) {
 
     val scalingLazyListState: ScalingLazyListState = rememberScalingLazyListState()
-    val profiles = listOf("Perfil1", "Perfil2", "Perfil3")
     val devices = remember { mutableStateOf(JsonArray(emptyList())) }
+    val profiles = remember { mutableStateOf(JsonArray(emptyList())) }
     val api = NetworkCommunicator()
 
     LaunchedEffect(Unit) {
-        devices.value = api.get()
+        devices.value = api.getDevices()
+        profiles.value = api.getProfiles()
+        println(profiles.value)
     }
 
     ScalingLazyColumn(
@@ -59,7 +61,7 @@ fun DeviceList(clickFn: (JsonObject) -> Unit) {
 
         /* Profile List */
         item { Text("Profiles", textAlign = TextAlign.Left, fontSize = 12.sp) }
-        items(profiles.size) { i -> ProfileCard(profiles[i], {}) }
+        items(profiles.value.size) { i -> ProfileCard(profiles.value[i].jsonObject, {}) }
     }
 }
 
