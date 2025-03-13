@@ -45,10 +45,10 @@ def get_profiles():
     global profiles
 
     return jsonify(
-        {
-            key: [device["name"] for device in devices]
+        [
+            {"name": key, "devices": [device.get("name", "X") for device in devices]}
             for key, devices in profiles.items()
-        }
+        ]
     )
 
 
@@ -64,7 +64,7 @@ def post_profiles():
         dev.pop("name")
         supported_devices[dtype].post(dev, BASE_URL, HEADERS)
 
-    return jsonify("Subido crack")
+    return jsonify("Profile applied!")
 
 
 with open("profiles.json", "r") as file:
