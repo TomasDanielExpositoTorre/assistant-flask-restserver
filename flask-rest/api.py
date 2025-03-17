@@ -61,14 +61,24 @@ def post_profiles():
     devices = profiles.get(data.get("profile", ""), [])
     for dev in devices:
         dtype, _, _ = dev["entity_id"].partition(".")
-        dev.pop("name")
-        supported_devices[dtype].post(dev, BASE_URL, HEADERS)
+        supported_devices[dtype].post(
+            {key: value for key, value in dev.items() if key != "name"},
+            BASE_URL,
+            HEADERS,
+        )
 
     return jsonify("Profile applied!")
 
 
+@app.route("/create", methods=["POST"])
+def create_profile():
+    global profiles
+    data: dict = json.loads(request.data)
+
+
 with open("profiles.json", "r") as file:
     profiles: dict = json.load(file)
+    devices = Device.get(BASE_URL, HEADERS)
 
 
 app.run(host="0.0.0.0", port=8000, ssl_context=("server.crt", "server.key"))
