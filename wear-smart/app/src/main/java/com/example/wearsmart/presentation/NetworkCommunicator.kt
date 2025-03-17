@@ -17,9 +17,9 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 
-class NetworkCommunicator() {
+class NetworkCommunicator {
     private val client = OkHttpClient()
-    private val url: String = "https://glados.local:8000/devices";
+    private val url: String = "https://glados.local:8000"
 
     /**
      * Fetch list of devices from the API.
@@ -27,43 +27,82 @@ class NetworkCommunicator() {
      * @return JsonArray with information for each device, or single-element
      * array.
      */
-    suspend fun get(): JsonArray {
-        val request = Request.Builder().url(url).build()
+    suspend fun get(endpoint: String): JsonArray {
+        val request = Request.Builder().url("${url}/${endpoint}").build()
         return withContext(Dispatchers.IO) {
             try {
                 val response = client.newCall(request).execute()
                 if (response.isSuccessful) {
                     Json.parseToJsonElement(response.body!!.string()).jsonArray
                 } else {
-                    JsonArray(listOf(JsonObject(mapOf(
-                        "name" to JsonPrimitive("Unavailable"),
-                        "type" to JsonPrimitive("light"),
-                        "attributes" to JsonObject(
-                            mapOf("Error ${response.code}" to JsonPrimitive(true)))))))
+                    JsonArray(
+                        listOf(
+                            JsonObject(
+                                mapOf(
+                                    "name" to JsonPrimitive("Unavailable"),
+                                    "type" to JsonPrimitive("light"),
+                                    "attributes" to JsonObject(
+                                        mapOf("Error ${response.code}" to JsonPrimitive(true))
+                                    ),
+                                    "devices" to JsonArray(
+                                        listOf(
+                                            JsonPrimitive("API Unreachable"),
+                                            JsonPrimitive("Check connection")
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    )
                 }
             } catch (e: Exception) {
-                Log.e("POTATOE", "Exception occurred: " + e.toString(), e)
+                Log.e("WearSmartERR", "Exception occurred: $e", e)
                 e.printStackTrace()
-                JsonArray(listOf(JsonObject(mapOf(
-                    "name" to JsonPrimitive("Unavailable"),
-                    "type" to JsonPrimitive("light"),
-                    "attributes" to JsonObject(
-                        mapOf("API Unreachable" to JsonPrimitive(true)))))))
+                JsonArray(
+                    listOf(
+                        JsonObject(
+                            mapOf(
+                                "name" to JsonPrimitive("Unavailable"),
+                                "type" to JsonPrimitive("light"),
+                                "attributes" to JsonObject(
+                                    mapOf("API Unreachable" to JsonPrimitive(true))
+                                ),
+                                "devices" to JsonArray(
+                                    listOf(
+                                        JsonPrimitive("API Unreachable"),
+                                        JsonPrimitive("Check connection")
+                                    )
+                                )
+                            )
+                        )
+                    )
+                )
             }
         }
+    }
+
+    suspend fun getDevices(): JsonArray {
+        return get("devices")
+    }
+
+    suspend fun getProfiles(): JsonArray {
+        return get("profiles")
     }
 
     /**
      * Post request wrapper for a `light` device type when turned on
      */
     fun post(
-        entityId: String, refs: MutableMap<String, MutableState<Float>>, rgb: JsonArray?,
-        r: MutableState<Float>, g: MutableState<Float>, b: MutableState<Float>
+        entityId: String,
+        refs: MutableMap<String, MutableState<Float>>,
+        rgb: JsonArray?,
+        r: MutableState<Float>,
+        g: MutableState<Float>,
+        b: MutableState<Float>
     ) {
 
         val data = mutableMapOf<String, Any>(
-            "entity_id" to entityId,
-            "off" to false
+            "entity_id" to entityId, "off" to false
         )
 
         for ((key, state) in refs) {
@@ -74,7 +113,7 @@ class NetworkCommunicator() {
             data["rgb"] = listOf(r.value.toInt(), g.value.toInt(), b.value.toInt())
         }
 
-        this.post(toJson(data));
+        this.post(toJson(data), "devices")
     }
 
 
@@ -84,28 +123,36 @@ class NetworkCommunicator() {
     fun post(entityId: String) {
 
         val data = mutableMapOf<String, Any>(
-            "entity_id" to entityId,
-            "off" to true
+            "entity_id" to entityId, "off" to true
         )
 
-        this.post(toJson(data));
+        this.post(toJson(data), "devices")
+    }
+
+    /**
+     * Post request wrapper for a `light` device type when turned off
+     */
+    fun postProfile(profileName: String) {
+
+        val data = mutableMapOf<String, Any>(
+            "profile" to profileName
+        )
+
+        this.post(toJson(data), "profiles")
     }
 
     /**
      * Post request to API
      */
-    private fun post(data: JsonObject) {
+    private fun post(data: JsonObject, endpoint: String) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val jsonInputString = data.toString()
 
                 val body = jsonInputString.toRequestBody("application/json".toMediaTypeOrNull())
 
-                val request = Request.Builder()
-                    .url(url)
-                    .addHeader("Content-Type", "application/json")
-                    .post(body)
-                    .build()
+                val request = Request.Builder().url("${url}/${endpoint}")
+                    .addHeader("Content-Type", "application/json").post(body).build()
 
                 val response: Response = client.newCall(request).execute()
                 println("Response Code: ${response.code}")
