@@ -61,5 +61,22 @@
       "Brightness": 150,
       "Temperature": 10
     }
+  ],
+  "Perfil 4": [
+    {
+      "entity_id": "light.lampara_de_lectura",
+      "name": "Lampara de lectura",
+      "off": true
+    },
+    {
+      "entity_id": "light.lampara_derecha",
+      "name": "Lampara derecha",
+      "off": true
+    },
+    {
+      "entity_id": "light.lampara_izquierda",
+      "name": "Lampara izquierda",
+      "off": true
+    }
   ]
 }
