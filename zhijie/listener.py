@@ -14,98 +14,107 @@ CHUNK = 2048              # Buffer size (number of samples per chunk)
 SILENCE_THRESHOLD = 500   # Silence threshold (adjust as needed)
 MIN_AUDIO_LENGTH = 1.0    # Minimum audio length in seconds to process
 BATCH_SIZE = 8            # Batch size for parallel processing
+NORMALIZER = 32768.0
+STREAM_URL = "http://192.168.138.11:8080/audio.wav"
 
 class Listener:
     def __init__(self, stream_url):
-        self.model = WhisperModel("large-v3", device="cuda", compute_type="int8")
-        self.batched_model = BatchedInferencePipeline(model=self.model)
-        self.audio = pyaudio.PyAudio()
+        self.whisper = WhisperModel("large-v3", device="cuda", compute_type="int8")
+        self.model = BatchedInferencePipeline(model=self.whisper)
         self.rules = Rules()
-        self.stream_url = stream_url
-
-    def process(self, stop_flag=threading.Event()):
-        if self.audio is None:
-            return
-
+        self.ffmpeg = self.open_ffmpeg(stream_url)
+        self.audio, self.stream = self.open_stream()
+        
+    def open_ffmpeg(self, stream_url):
         # FFmpeg command to stream audio from URL
         ffmpeg_command = [
             'ffmpeg',
-            '-i', self.stream_url,  # Input URL
+            '-i', stream_url,     # Input URL
             '-f', 's16le',        # Output format (16-bit PCM)
-            '-ac', str(CHANNELS),  # Number of channels
+            '-ac', str(CHANNELS), # Number of channels
             '-ar', str(RATE),     # Sampling rate
             '-loglevel', 'quiet', # Suppress logs
             '-'                   # Output to stdout
         ]
-
         # Start FFmpeg process
-        ffmpeg_process = sp.Popen(ffmpeg_command, stdout=sp.PIPE, stderr=sp.PIPE)
-
+        return sp.Popen(ffmpeg_command, stdout=sp.PIPE, stderr=sp.PIPE)
+    
+    def open_stream(self):
         # Open PyAudio stream
-        stream = self.audio.open(
+        audio = pyaudio.PyAudio()
+        return audio, audio.open(
             format=FORMAT,
             channels=CHANNELS,
             rate=RATE,
             input=True,
             frames_per_buffer=CHUNK
         )
+    
+    def process(self, audio):
+        """
+        Wrapper function to record and process audio until silence is detected.
+
+        Args:
+            audio (bytes): Initial audio section
+
+        Returns:
+            NDarray: Raw numpy array representation of the recorded audio buffer.
+        """
+        frames = [audio]
+        while True:
+            audio = self.ffmpeg.stdout.read(CHUNK * CHANNELS * 2)
+            audio_np = np.frombuffer(audio, dtype=np.int16)
+            
+            if not audio or np.abs(audio_np).mean() < SILENCE_THRESHOLD:
+                return np.frombuffer(b''.join(frames), dtype=np.int16).astype(np.float32) / 32768.0
+
+            frames.append(audio)
+
+
+    def start(self):
+        """
+        Main loop for the process, where audio is captured from the microphone
+        until interrupted.
+        """
+        if self.audio is None:
+            return
 
         print("Listening...")
-
         try:
             while True:
                 # Read audio data from FFmpeg stdout
-                raw_audio = ffmpeg_process.stdout.read(CHUNK * CHANNELS * 2)  # 2 bytes per sample
-                if not raw_audio:
+                audio = self.ffmpeg.stdout.read(CHUNK * CHANNELS * 2)  # 2 bytes per sample
+                if not audio:
                     break
 
                 # Convert raw audio to numpy array
-                audio_np = np.frombuffer(raw_audio, dtype=np.int16)
+                audio_np = np.frombuffer(audio, dtype=np.int16)
 
-                # Check if the audio level is above the silence threshold
-                if np.abs(audio_np).mean() > SILENCE_THRESHOLD:
-                    print("Processing...")
-                    frames = [raw_audio]
+                if np.abs(audio_np).mean() <= SILENCE_THRESHOLD:
+                    continue
 
-                    # Continue recording until silence is detected
-                    while True:
-                        raw_audio = ffmpeg_process.stdout.read(CHUNK * CHANNELS * 2)
-                        if not raw_audio:
-                            break
-                        audio_np = np.frombuffer(raw_audio, dtype=np.int16)
-                        if np.abs(audio_np).mean() < SILENCE_THRESHOLD:
-                            break
-                        frames.append(raw_audio)
+                print("Processing...")
+                raw = self.process(audio)
 
-                    # Combine the recorded frames into a single audio buffer
-                    audio_buffer = b''.join(frames)
+                # Transcribe the audio using Faster Whisper
+                segments, _ = self.model.transcribe(raw, "es", batch_size=BATCH_SIZE)
 
-                    # Convert the audio buffer to a numpy array
-                    audio_np = np.frombuffer(audio_buffer, dtype=np.int16).astype(np.float32) / 32768.0
-
-                    # Transcribe the audio using Faster Whisper
-                    segments, _ = self.batched_model.transcribe(
-                        audio_np,
-                        language="es",
-                        batch_size=BATCH_SIZE
-                    )
-
-                    # Print the recognized text in real-time
-                    sentence = "".join([seg.text for seg in segments])
-                    self.rules.analyze(sentence)
+                # Analyze and print the recognized text in real-time
+                self.rules.analyze("".join([seg.text for seg in segments]))
 
         except KeyboardInterrupt:
             print("Stopping...")
 
-        finally:
-            # Clean up
-            ffmpeg_process.terminate()
-            stream.stop_stream()
-            stream.close()
-            self.audio.terminate()
-
+        self.stop()
+    
+    def stop(self):
+        """
+        Perform cleanup of the listener process on user interrupt.
+        """
+        self.ffmpeg.terminate()
+        self.stream.stop_stream()
+        self.stream.close()
+        self.audio.terminate()
 
 if __name__ == "__main__":
-    # Replace with your streaming URL
-    stream_url = "http://192.168.138.11:8080/audio.wav"
-    Listener(stream_url).process()
+    Listener(STREAM_URL).start()
