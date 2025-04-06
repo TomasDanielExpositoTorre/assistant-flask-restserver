@@ -55,6 +55,7 @@ dependencies {
     implementation(libs.compose.navigation)
     implementation(libs.compose.material3)
     implementation(libs.okhttp)
+    implementation(libs.jmdns)
     implementation(libs.kotlinx.serialization.json)
     androidTestImplementation(platform(libs.compose.bom))
     androidTestImplementation(libs.ui.test.junit4)

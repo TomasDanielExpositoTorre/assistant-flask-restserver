@@ -5,22 +5,49 @@ import androidx.compose.runtime.MutableState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonArray
+import okhttp3.Dns
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
+import java.net.InetAddress
+import java.net.UnknownHostException
 
 class NetworkCommunicator {
-    private val client = OkHttpClient()
-    private val url: String = "https://glados.local:8000"
 
+    var client : OkHttpClient
+    companion object {
+        var url : String = "https://glados.local:8000";
+    }
+
+    init {
+
+
+        val dns = object : Dns {
+            private val cache = mutableMapOf<String, List<InetAddress>>()
+
+            @Throws(UnknownHostException::class)
+            override fun lookup(hostname: String): List<InetAddress> {
+                cache[hostname]?.let {
+                    return it
+                }
+
+                println("Custom DNS lookup for: $hostname")
+                val result = listOf(InetAddress.getByName(hostname))
+                cache[hostname] = result
+                return result
+            }
+        }
+        client = OkHttpClient.Builder().dns(dns).build()
+    }
     /**
      * Fetch list of devices from the API.
      *

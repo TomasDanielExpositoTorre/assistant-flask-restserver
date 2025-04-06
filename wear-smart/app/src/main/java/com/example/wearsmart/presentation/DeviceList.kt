@@ -35,6 +35,7 @@ fun DeviceList(clickFn: (JsonObject) -> Unit) {
     val api = NetworkCommunicator()
 
     LaunchedEffect(Unit) {
+        // api.resolveURL()
         devices.value = api.getDevices()
         profiles.value = api.getProfiles()
         println(profiles.value)
