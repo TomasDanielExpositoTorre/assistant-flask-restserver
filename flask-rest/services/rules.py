@@ -133,13 +133,13 @@ class Rules:
         if color:
             request["rgb"] = color
         if kelvin:
-            request["Temperature"] = kelvin
+            request["kelvin"] = kelvin
         if brightness:
-            request["Brightness"] = brightness
+            request["brightness"] = brightness
 
         # Use default when no parameters are provided
         if not (color or kelvin or brightness):
-            request = {"Brightness": 150, "Temperature": 4000}
+            request = {"brightness": 150, "kelvin": 4000}
 
         for light in lights:
             requests.post(

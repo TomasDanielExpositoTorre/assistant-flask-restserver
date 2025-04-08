@@ -53,6 +53,8 @@ class Light(Device):
         mapper = {
             "Brightness": "brightness",
             "Temperature": "kelvin",
+            "brightness": "brightness",
+            "kelvin": "kelvin",
             "rgb": "rgb_color",
             "entity_id": "entity_id",
         }

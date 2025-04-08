@@ -4,7 +4,7 @@
       "entity_id": "light.lampara_derecha",
       "name": "Lampara derecha",
       "off": false,
-      "Brightness": 255,
+      "brightness": 255,
       "rgb": [240, 117, 223]
     },
     {
@@ -28,15 +28,15 @@
       "entity_id": "light.lampara_de_lectura",
       "name": "Lampara de lectura",
       "off": false,
-      "Brightness": 255,
-      "Temperature": 10000
+      "brightness": 255,
+      "kelvin": 10000
     },
     {
       "entity_id": "light.lampara_izquierda",
       "name": "Lampara izquierda",
       "off": false,
-      "Brightness": 255,
-      "Temperature": 10000
+      "brightness": 255,
+      "kelvin": 10000
     }
   ],
   "Perfil 3": [
@@ -44,22 +44,22 @@
       "entity_id": "light.lampara_de_lectura",
       "name": "Lampara de lectura",
       "off": false,
-      "Brightness": 150,
-      "Temperature": 10
+      "brightness": 150,
+      "kelvin": 10
     },
     {
       "entity_id": "light.lampara_derecha",
       "name": "Lampara derecha",
       "off": false,
-      "Brightness": 150,
-      "Temperature": 10
+      "brightness": 150,
+      "kelvin": 10
     },
     {
       "entity_id": "light.lampara_izquierda",
       "name": "Lampara izquierda",
       "off": false,
-      "Brightness": 150,
-      "Temperature": 10
+      "brightness": 150,
+      "kelvin": 10
     }
   ],
   "Perfil 4": [
