@@ -10,17 +10,31 @@ To set up an environment for the main API, install the required modules in requi
 apt install python3-virtualenv
 virtualenv venv
 source venv/bin/activate
-cd flask-rest
 pip3 install -r requirements.txt
 ```
 
-Then, after running additional setup steps below, you can start the service
+Then, after running one of the [HTTPS Hosting](#https-hosting) options down below, you can start the service:
 
 ```bash
+cd flask-rest
 python3 api.py
 ```
+---
 
-### mDNS Setup (Option A, default)
+## HTTPS Hosting
+
+### Static IP hosting
+
+You can host the base API as a service with a defined, static IP. If you want to include HTTPS encrypted communication for the service, modify the [server.conf](flask-rest/data/server.conf) file to point to your IP, then generate a self-signed certificate:
+
+```bash
+cd flask-rest/data
+source certgen.sh
+```
+
+For any application to trust this certificate, the `server.pem` file that this service outputs has to be provided to it. 
+
+### mDNS Setup
 
 You can use mDNS (Multicast-DNS) to resolve the hostname of the API instead of using your IP address directly, if you don't plan on statically hosting this service. To install mDNS for a linux device, run the following commands:
 
@@ -36,7 +50,7 @@ yum install avahi avahi-tools
 dnf install avahi avahi-tools
 ```
 
-The avahi-daemon service allows to resolve your address as {hostname}.local. The default, assumed hostname for this project is 'glados', but this can be changed in the configuration file:
+The avahi-daemon service allows to resolve your address as {hostname}.local, where `hostname` can be changed in the following configuration file:
 
 ```conf
 # In /etc/avahi/avahi-daemon.conf
@@ -45,7 +59,7 @@ host-name=glados # Or your preferred hostname
 allow-interfaces=eth0,wlan0,wlo1 # Change with the interface your service is running in
 ```
 
-And create a service file for the API:
+After this, create a service file for the API:
 
 ```xml
 <!-- In /etc/avahi/services/assistant-flask.conf -->
@@ -60,15 +74,16 @@ And create a service file for the API:
 </service-group>
 ```
 
-To work over HTTPS, you will need to generate a self-signed certificate. You can use the provided script for this:
+To work over HTTPS, you will need to generate a self-signed certificate. You can use the provided script for this after changing the DNS field in [server.conf](flask-rest/data/server.conf):
 
 ```bash
-cd flask-rest
+cd flask-rest/data
 source certgen.sh
-python3 api.py
 ```
 
-### Port Forwarding setup (Option B)
+For any application to trust this certificate, the `server.pem` file that this service outputs has to be provided to it.
+
+### Port Forwarding setup
 
 Instead of using mDNS, you can acquire a DDNS domain name through some of the following services:
 
@@ -82,7 +97,9 @@ sudo apt install certbot
 certbot certonly --standalone -d YOURDOMAINNAMEHERE
 ```
 
-### LetsEncrypt DNS Challenge (Option C)
+After generating the certificate, place the `server.crt` and `server.key` files in the data directory.
+
+### LetsEncrypt DNS Challenge
 
 If you don't want to expose your service ports to the internet, you can instead generate a certificate through a LetsEcrypt DNS-01 challenge.
 
@@ -92,13 +109,20 @@ If you don't want to expose your service ports to the internet, you can instead 
 
 - For DuckDNS, you can follow along the example in the plugin [documentation](https://pypi.org/project/certbot-dns-duckdns/)
 
+This option is also compatible with self-signed certificates, where you can:
+1. Generate the LetsEncrypt certificate through a reverse-proxy app (for example, [Nginx Proxy Manager](https://nginxproxymanager.com/)).
+2. Launch the API with a self-signed certificate like [here](#static-ip-hosting).
+3. Redirect all petitions from the proxy manager to the API IP address.
+
+---
+
 ## Integration with Wear-OS (wear-smart)
 
-WearOS enforces HTTPS communication, so one of the three name resolution setups mentioned above must be followed for it to function correctly.
+WearOS enforces HTTPS communication, but address resolution through mDNS is unstable and not supported by default.
 
-### mDNS
+### Static IP
 
-If you chose option A in the setup above, simply running the certificate generation script will create a copy (server_cert.crt). You must recompile the wear-smart application after generating this script. If you want to use a domain name different from _glados.local_, please change it in the following files:
+If you chose option A in the setup above, simply running the certificate generation script will create a copy (server_cert.crt) for the WearOS app. You must recompile the wear-smart application after generating this script. You must reflect your new hostname in the following files:
 
 - server.conf (for the certificate generation)
 - NetworkCommunicator.kt
@@ -106,8 +130,17 @@ If you chose option A in the setup above, simply running the certificate generat
 
 ### Port Forwarding or DNS Challenge
 
-If you chose either option B or C in the setup above, update the API endpoint in `NetworkCommunicator.kt` to your new URL.
+If you chose either option B or C in the setup above, update the API endpoint in `NetworkCommunicator.kt` with your new URL.
 
 ### Running the App (Android Studio)
 
-To compile the app in android studio (linux), click on `Build > Generate App Bundle or APKs > Generate APKs`, which can then be installed through `adb` in your watch. To enable adb debugging in a wearOS smartwatch, follow this [guide](https://developer.android.com/training/wearables/get-started/debugging)
+To compile the app in android studio (linux), click on `Build > Generate App Bundle or APKs > Generate APKs`, which can then be installed through `adb` in your watch:
+```bash
+adb pair watch-ip:watch-port
+adb connect watch-ip:watch-port
+cd wear-smart/app/build/outputs/apk/debug
+adb -s watch-ip:watch-port install app.debug.apk
+```
+
+
+To enable adb debugging in a wearOS smartwatch, follow this [guide](https://developer.android.com/training/wearables/get-started/debugging)
