@@ -23,14 +23,12 @@ import java.net.UnknownHostException
 
 class NetworkCommunicator {
 
-    var client : OkHttpClient
+    private var client : OkHttpClient
     companion object {
-        var url : String = "https://glados.local:8000";
+        var url : String = "https://flaskha.transtar.webredirect.org/";
     }
 
     init {
-
-
         val dns = object : Dns {
             private val cache = mutableMapOf<String, List<InetAddress>>()
 
