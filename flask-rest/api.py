@@ -76,9 +76,9 @@ def create_profile():
     data: dict = json.loads(request.data)
 
 
-with open("profiles.json", "r") as file:
+with open("data/profiles.json", "r") as file:
     profiles: dict = json.load(file)
     devices = Device.get(BASE_URL, HEADERS)
 
 
-app.run(host="0.0.0.0", port=8000, ssl_context=("server.crt", "server.key"))
+app.run(host="0.0.0.0", port=8000, ssl_context=("data/server.crt", "data/server.key"))

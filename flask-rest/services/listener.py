@@ -1,10 +1,8 @@
 import numpy as np
 import pyaudio
 from faster_whisper import BatchedInferencePipeline, WhisperModel
-import threading
 from rules import Rules
 import subprocess as sp
-import os
 
 # Configuration
 FORMAT = pyaudio.paInt16  # Audio format (16-bit)

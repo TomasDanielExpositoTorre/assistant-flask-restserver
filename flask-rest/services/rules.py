@@ -1,12 +1,15 @@
 import re
 import webcolors
 import requests
+import os
+from dotenv import load_dotenv
 
+load_dotenv('../.env')
 
 class Rules:
     def __init__(self):
 
-        self.api = "https://glados.local:8000"
+        self.api = os.getenv("API_URL", "https://glados.local:8000")
         self.lights = re.compile(
             r"(l[aá]mpara|lapara|luz|lus|lustra|luces)", re.IGNORECASE
         )
