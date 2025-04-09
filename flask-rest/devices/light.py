@@ -1,3 +1,7 @@
+"""
+This module specifies support for light-emitting devices that can be
+regulated from brightness, temperature and/or RGB values.
+"""
 import json
 from .device import Device
 import requests
@@ -6,6 +10,9 @@ from flask import jsonify
 
 class Light(Device):
     def __init__(self, data: dict):
+        """
+        Constructor method for this class
+        """
         super().__init__(data)
 
         attrs = data["attributes"]
@@ -27,6 +34,9 @@ class Light(Device):
             ]
 
     def data(self):
+        """
+        Returns a json-serializable object with device data.
+        """
         mapper = {
             "kelvin": "Temperature",
             "brightness": "Brightness",
@@ -43,13 +53,10 @@ class Light(Device):
         }
 
     @classmethod
-    def get(cls, id, url, headers):
-        url = f"{url}/api/states/{id}"
-        response = requests.get(url, headers=headers)
-        return json.loads(response.text)
-
-    @classmethod
     def post(cls, request: dict, url: str, headers: dict):
+        """
+        Wrapper method to post new light attributes
+        """
         mapper = {
             "Brightness": "brightness",
             "Temperature": "kelvin",

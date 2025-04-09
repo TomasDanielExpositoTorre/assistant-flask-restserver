@@ -1,3 +1,6 @@
+"""
+Module that defines the ruleset for the listener service.
+"""
 import re
 import webcolors
 import requests

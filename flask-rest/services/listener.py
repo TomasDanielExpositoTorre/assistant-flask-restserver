@@ -1,3 +1,6 @@
+"""
+Service example for voice recognition using BetterWhisper and ffmpeg
+"""
 import numpy as np
 import pyaudio
 from faster_whisper import BatchedInferencePipeline, WhisperModel

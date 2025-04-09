@@ -1,3 +1,7 @@
+"""
+Rest API module.
+"""
+
 import json
 from flask import Flask, request, jsonify
 from dotenv import load_dotenv
@@ -20,6 +24,9 @@ cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
 @app.route("/devices", methods=["GET"])
 def get_devices():
+    """
+    Get all available (supported) devices from the Home Assistant endpoint.
+    """
     devices = Device.get(BASE_URL, HEADERS)
     supported_devices = {"light": Light}
     data = []
@@ -34,6 +41,9 @@ def get_devices():
 
 @app.route("/devices", methods=["POST"])
 def post_devices():
+    """
+    Petition wrapper to modify the state of a device.
+    """
     data: dict = json.loads(request.data)
     supported_devices = {"light": Light}
     dtype, _, _ = data["entity_id"].partition(".")
@@ -42,6 +52,10 @@ def post_devices():
 
 @app.route("/profiles", methods=["GET"])
 def get_profiles():
+    """
+    Returns a set of pre-defined profile titles that can be applied to a device
+    set.
+    """
     global profiles
 
     return jsonify(
@@ -54,6 +68,9 @@ def get_profiles():
 
 @app.route("/profiles", methods=["POST"])
 def post_profiles():
+    """
+    Applies the received a pre-defined profile to the setup.
+    """
     global profiles
     data: dict = json.loads(request.data)
     supported_devices = {"light": Light}
@@ -68,12 +85,6 @@ def post_profiles():
         )
 
     return jsonify("Profile applied!")
-
-
-@app.route("/create", methods=["POST"])
-def create_profile():
-    global profiles
-    data: dict = json.loads(request.data)
 
 
 with open("data/profiles.json", "r") as file:
