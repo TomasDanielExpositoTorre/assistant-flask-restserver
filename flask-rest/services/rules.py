@@ -106,7 +106,7 @@ class Rules:
             requests.post(
                 url=f"{self.api}/profiles",
                 json={"profile": f"Perfil {_.group(1)}"},
-                verify="../server.pem",
+                verify="../data/server.pem",
             )
             return True
         if not re.search(self.lights, sentence):
@@ -126,7 +126,7 @@ class Rules:
             requests.post(
                 url=f"{self.api}/devices",
                 json={"entity_id": light, "off": True},
-                verify="../server.pem",
+                verify="../data/server.pem",
             )
 
     def turn_on(self, lights, color, kelvin, brightness):
@@ -148,7 +148,7 @@ class Rules:
             requests.post(
                 url=f"{self.api}/devices",
                 json={**request, "entity_id": light, "off": False},
-                verify="../server.pem",
+                verify="../data/server.pem",
             )
 
 

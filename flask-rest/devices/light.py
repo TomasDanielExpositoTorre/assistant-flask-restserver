@@ -51,6 +51,22 @@ class Light(Device):
                 mapper[key]: value for key, value in self.attributes.items()
             },
         }
+    
+    @classmethod
+    def get(self, entity_id, url, headers):
+        """
+        Gets specific device configured in a Home Assistant setup.
+        """
+        url = f"{url}/api/states"
+        response = requests.get(url, headers=headers)
+        devices = json.loads(response.text)
+        supported_devices = {"light": Light}
+        print(entity_id)
+        for d in devices:
+            dtype, _, _ = d["entity_id"].partition(".")
+            if supported_devices.get(dtype) and d["entity_id"] == entity_id: 
+                return d
+        return None
 
     @classmethod
     def post(cls, request: dict, url: str, headers: dict):
@@ -66,7 +82,6 @@ class Light(Device):
             "entity_id": "entity_id",
         }
         turn_off = request.pop("off")
-
         # Turn the light off
         if turn_off:
             request = {"entity_id": request["entity_id"]}
@@ -76,7 +91,7 @@ class Light(Device):
                 json=request,
             )
             return jsonify("Turning off!")
-
+        
         # Turn the light on
         attrs = Light.get(request["entity_id"], url, headers)["attributes"]
         request = {mapper[key]: value for key, value in request.items()}
